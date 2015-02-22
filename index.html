@@ -89,7 +89,7 @@ if (!file.exists(&quot;./data/pml-testing.csv&quot;)) {
 }
 
 testing &lt;- read.table(&quot;./data/pml-testing.csv&quot;, header=TRUE, sep = &quot;,&quot;, na.strings = c(&quot;&quot;, &quot; &quot;,&quot;NA&quot;), stringsAsFactor=FALSE)</code></pre>
-<p>Let’s look at some of the characteristics of this data</p>
+<p>Let’s look at some of the characteristics of this data, prepare it for training by removing some variables and then create a cross-validation dataset since we are looking to find the best model.</p>
 <pre class="r"><code>library(caret)</code></pre>
 <pre><code>## Loading required package: lattice
 ## Loading required package: ggplot2</code></pre>
@@ -217,6 +217,9 @@ dim(training)</code></pre>
 inTrain = createDataPartition(training$classe, p = 3/4)[[1]]
 train = training[ inTrain,]
 cv = training[-inTrain,]</code></pre>
+</div>
+<div id="training-and-evaluation-on-cross-validation-set" class="section level3">
+<h3>Training and Evaluation on Cross-Validation set</h3>
 <p>Let’s train and evaluate the model for several different algorithms and compare the accuracy of the model against the cross-validation set. We’ll use the model that has the highest accuracy.</p>
 <p>The first model we’ll train is a simple decision tree.</p>
 <pre class="r"><code>model_DT = train(classe ~ ., data=train, method=&quot;rpart&quot;)</code></pre>
@@ -342,7 +345,10 @@ C_RF</code></pre>
 ## Detection Rate         0.2843   0.1925   0.1741   0.1627   0.1837
 ## Detection Prevalence   0.2851   0.1929   0.1752   0.1627   0.1841
 ## Balanced Accuracy      0.9991   0.9971   0.9988   0.9963   0.9998</code></pre>
-<p>As you can see, the random forest far outperformed the other models and is the one we will use to make our predictions</p>
+</div>
+<div id="results" class="section level3">
+<h3>Results</h3>
+<p>As you can see, the random forest far outperformed the other models and is the one we will use to make our predictions. We can see from the confusion matrix that we can expect the accuracy to be around but most likely not better than 99.7%</p>
 </div>
 <div id="here-is-the-environment-info-that-this-was-run-on." class="section level3">
 <h3>Here is the environment info that this was run on.</h3>
@@ -358,28 +364,12 @@ C_RF</code></pre>
 ## [5] LC_TIME=English_United States.1252    
 ## 
 ## attached base packages:
-## [1] grid      stats     graphics  grDevices utils     datasets  methods  
-## [8] base     
-## 
-## other attached packages:
-## [1] randomForest_4.6-10 MASS_7.3-35         rpart_4.1-8        
-## [4] gridExtra_0.9.1     caret_6.0-41        ggplot2_1.0.0      
-## [7] lattice_0.20-29    
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] BradleyTerry2_1.0-5 brglm_0.5-9         car_2.0-24         
-##  [4] class_7.3-11        codetools_0.2-9     colorspace_1.2-4   
-##  [7] compiler_3.1.2      digest_0.6.6        e1071_1.6-4        
-## [10] evaluate_0.5.5      foreach_1.4.2       formatR_1.0        
-## [13] gtable_0.1.2        gtools_3.4.1        htmltools_0.2.6    
-## [16] iterators_1.0.7     knitr_1.9           lme4_1.1-7         
-## [19] Matrix_1.1-4        mgcv_1.8-3          minqa_1.2.4        
-## [22] munsell_0.4.2       nlme_3.1-118        nloptr_1.0.4       
-## [25] nnet_7.3-8          parallel_3.1.2      pbkrtest_0.4-2     
-## [28] plyr_1.8.1          proto_0.3-10        quantreg_5.11      
-## [31] Rcpp_0.11.3         reshape2_1.4.1      rmarkdown_0.3.11   
-## [34] scales_0.2.4        SparseM_1.6         splines_3.1.2      
-## [37] stringr_0.6.2       tools_3.1.2         yaml_2.1.13</code></pre>
+## [1] digest_0.6.6     evaluate_0.5.5   formatR_1.0      htmltools_0.2.6 
+## [5] knitr_1.9        rmarkdown_0.3.11 stringr_0.6.2    tools_3.1.2     
+## [9] yaml_2.1.13</code></pre>
 </div>
 </div>
 </div>

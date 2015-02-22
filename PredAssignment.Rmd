@@ -41,7 +41,7 @@ testing <- read.table("./data/pml-testing.csv", header=TRUE, sep = ",", na.strin
 
 ```
 
-Let's look at some of the characteristics of this data
+Let's look at some of the characteristics of this data, prepare it for training by removing some variables and then create a cross-validation dataset since we are looking to find the best model.
 ```{r cache=TRUE}
 library(caret)
 library(ggplot2)
@@ -69,6 +69,7 @@ train = training[ inTrain,]
 cv = training[-inTrain,]
 ```
 
+### Training and Evaluation on Cross-Validation set
 Let's train and evaluate the model for several different algorithms and compare the accuracy of the model against the cross-validation set. We'll use the model that has the highest accuracy.
 
 The first model we'll train is a simple decision tree.
@@ -107,9 +108,10 @@ C_RF <- confusionMatrix(preds_RF, cv$classe)
 C_RF
 ```
 
-As you can see, the random forest far outperformed the other models and is the one we will use to make our predictions
+### Results
+As you can see, the random forest far outperformed the other models and is the one we will use to make our predictions. We can see from the confusion matrix that we can expect the accuracy to be around but most likely not better than 99.7%
 
-```{r}
+```{r cache=TRUE}
 
 
 ```
