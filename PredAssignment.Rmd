@@ -1,0 +1,123 @@
+---
+title: "PML_PredAssignment"
+author: "Brian Schlatter"
+date: "Saturday, February 14, 2015"
+output: html_document
+---
+
+# Determine the type of activity in which the excercise was being performed. 
+
+
+## Synopsis
+There are 5 activity classes that are labeled A, B, C, D, and E in the training set. From the literature these map to, but not necessarily in this order, Sitting, Sitting Down, Standing, Standing Up and Walking. The data collected is from multiple sensors attached to the person doing the excercise and to a dumbbel. Raw measurements are taken several times a second throughout the during of the excercise. Summary statistics are also captured for each activity window. The goal is to use some or all of this data to predict if they were Sitting, Sitting Down, Standing, Standing Up or Walking.
+
+
+## Data Processing
+The data was downloaded from the following website, http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv and http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+We removed the first 7 columns as they weren't as useful in making a prediction. These variables were for the name, date, time, etc. We also removed any columns that had NA's in them. This took us from 159 predictors to 52 predictors and these roughly mapped to the raw measurements taken during the excercise activity. 
+
+### Reading in the data
+Download the data file from the website and read it in. 
+```{r cache=TRUE}
+# Prep download folder
+if (!file.exists("data")) {
+  dir.create("data")
+}
+
+if (!file.exists("./data/pml-training.csv")) {
+  fileURL = "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv?accessType=DOWNLOAD"
+  download.file(fileURL, dest="./data/pml-training.csv")
+}
+
+training <- read.table("./data/pml-training.csv", header=TRUE, sep = ",", na.strings = c("", " ","NA"), stringsAsFactor=FALSE)
+
+if (!file.exists("./data/pml-testing.csv")) {
+  fileURL = "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv?accessType=DOWNLOAD"
+  download.file(fileURL, dest="./data/pml-testing.csv")
+}
+
+testing <- read.table("./data/pml-testing.csv", header=TRUE, sep = ",", na.strings = c("", " ","NA"), stringsAsFactor=FALSE)
+
+```
+
+Let's look at some of the characteristics of this data
+```{r cache=TRUE}
+library(caret)
+library(ggplot2)
+library(gridExtra)
+
+dim(training)
+str(training)
+
+#featurePlot(x=training[,c("")])
+
+training$classe <- as.factor(training$classe)
+
+# Now let's remove any remaining columns with NAs.
+cols_to_keep <- colSums(is.na(training)) == 0
+# Let's also get rid of the first 7 columns which are user names, times, etc.
+cols_to_keep[1:7] = FALSE
+
+training <- training[,cols_to_keep]
+testing <- testing[,cols_to_keep]
+dim(training)
+
+# split our data for training and testing. The other testing set doesn't have class labels
+inTrain = createDataPartition(training$classe, p = 3/4)[[1]]
+train = training[ inTrain,]
+cv = training[-inTrain,]
+```
+
+Let's train and evaluate the model for several different algorithms and compare the accuracy of the model against the cross-validation set. We'll use the model that has the highest accuracy.
+
+The first model we'll train is a simple decision tree.
+```{r  cache=TRUE}
+model_DT = train(classe ~ ., data=train, method="rpart")
+preds_DT <- predict(model_DT, cv)
+C_DT <- confusionMatrix(preds_DT, cv$classe)
+C_DT
+```
+
+The next model is linear discriminant analysis
+```{r  cache=TRUE}
+model_LDA = train(classe ~ ., data=train, method="lda")
+preds_LDA <- predict(model_LDA, cv)
+C_LDA <- confusionMatrix(preds_LDA, cv$classe)
+C_LDA
+```
+
+Finally, let's train a random forest
+```{r  cache=TRUE}
+library(randomForest)
+library(caret)
+
+# Figure out how to get one of these to work
+# library(doMC)
+# library(doMPI)  
+# library(doParallel) 
+# library(doSMP)
+
+x <- data.frame(train[,names(train) != "classe"])
+y <- train$classe
+rfParam <- expand.grid(mtry=floor(sqrt(dim(x)[2])))
+model_RF = train(x, y, method="rf", tuneGrid=rfParam, ntree=500, importance=TRUE)
+preds_RF <- predict(model_RF, cv)
+C_RF <- confusionMatrix(preds_RF, cv$classe)
+C_RF
+```
+
+As you can see, the random forest far outperformed the other models and is the one we will use to make our predictions
+
+```{r}
+
+
+```
+
+
+
+### Here is the environment info that this was run on.
+```{r}
+sessionInfo()
+```
+
