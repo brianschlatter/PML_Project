@@ -111,8 +111,12 @@ C_RF
 ### Results
 As you can see, the random forest far outperformed the other models and is the one we will use to make our predictions. We can see from the confusion matrix that we can expect the accuracy to be around but most likely not better than 99.7%
 
-```{r cache=TRUE}
 
+### Predictions on Test set
+```{r cache=TRUE}
+# Let's make predictions on the testing set now.
+pred_RF_TestSet <- predict(model_RF, testing)
+pred_RF_TestSet
 
 ```
 
